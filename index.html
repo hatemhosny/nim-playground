@@ -1,0 +1,1138 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nim Playground</title>
+    <meta
+      name="description"
+      content="A browser playground for the Nim programming language, powered by LiveCodes. Nim is compiled to WebAssembly and runs entirely client-side."
+    />
+    <meta name="theme-color" content="#171921" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23171921'/><g transform='translate(5,16.6)'><g transform='translate(-664.83823,-596.61255)'><path fill='%23f3d400' d='m 709.69141,596.61258 c 0,0 -3.41031,2.69499 -6.88691,5.37174 -3.57641,-0.11362 -10.59106,0.68718 -14.39187,2.06946 -3.50133,-2.21819 -6.57787,-4.66728 -6.57787,-4.66728 0,0 -2.62896,4.52282 -4.28224,7.17702 -2.45187,1.30403 -4.91362,2.77074 -7.10764,4.7113 -2.55188,-1.01333 -5.5101,-2.24876 -5.60665,-2.28959 3.37945,6.81645 5.65131,13.64192 11.83134,17.74436 9.83897,-15.53906 55.55981,-14.10685 65.60219,-0.0881 6.49004,-3.38511 9.01412,-10.66815 11.56647,-17.39212 -0.27986,0.0922 -3.75271,1.25487 -6.00396,2.11349 -1.34414,-1.46336 -4.51234,-3.71327 -6.31301,-4.79936 -1.70802,-3.12771 -4.19395,-7.35313 -4.19395,-7.35313 0,0 -2.94437,2.1899 -6.35714,4.5792 -4.61059,-0.85108 -10.1872,-1.88519 -14.87749,-1.62916 -3.19286,-2.62436 -6.40127,-5.54786 -6.40127,-5.54786 z'/><path fill='%23ffe953' d='m 668.33241,623.47127 c 0,0 4.78987,11.5978 8.1165,19.65678 14.09625,18.59727 50.09234,19.89014 65.7848,0.36006 3.71345,-8.36876 8.72334,-20.1298 8.72334,-20.1298 -4.0259,5.96409 -10.5778,10.08114 -14.61301,12.29885 -2.86735,1.57082 -9.48338,2.52031 -9.48338,2.52031 l -17.36961,-9.00108 -17.46941,8.82104 c 0,0 -6.52806,-1.04882 -9.4834,-2.4303 -5.96472,-3.18408 -9.9764,-6.94592 -14.20583,-12.09586 z'/></g></g></svg>"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Titillium+Web:wght@400;600;700&family=Inconsolata:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        color-scheme: light;
+        /* Palette taken from nim-lang.org (assets/css/main.css) */
+        --bg: #fdfdfd;
+        --bg-faded: #e9e9e9;
+        --surface-2: #ffffff;
+        --border: #cfcfcf;
+        --border-soft: #e9e9e9;
+        --text: #111111;
+        --muted: #666666;
+        --nav: #171921;
+        --dark: #232733;
+        --yellow: #ffe953;
+        --yellow-hover: #ffe220;
+        --gold: #9a8700;
+        --gold-hover: #cdb300;
+        --on-accent: #111111;
+        --ok: #ffe953;
+        --danger: #ff9a8b;
+        --radius: 2px;
+        --font-sans:
+          "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+        --font-heading:
+          "Titillium Web", "Open Sans", "Helvetica Neue", Helvetica, Arial,
+          sans-serif;
+        --font-mono: "Inconsolata", monospace;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        height: 100%;
+      }
+
+      body {
+        margin: 0;
+        height: 100vh;
+        height: 100dvh;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--font-sans);
+        font-size: 16px;
+        line-height: 1.5;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      button,
+      select {
+        font-family: var(--font-sans);
+      }
+
+      a {
+        color: var(--gold);
+      }
+
+      a:hover,
+      a:focus {
+        color: var(--gold-hover);
+      }
+
+      /* ---------- top bar ---------- */
+
+      .topbar {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 8px 18px;
+        min-height: 52px;
+        background: var(--nav);
+        color: #ffffff;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+      }
+
+      .brand svg {
+        flex: none;
+      }
+
+      .brand h1 {
+        margin: 0;
+        font-family: var(--font-heading);
+        font-size: 1.125rem;
+        font-weight: 600;
+        letter-spacing: 0.01em;
+        white-space: nowrap;
+      }
+
+      .tag {
+        font-family: var(--font-sans);
+        font-size: 0.6875rem;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        padding: 2px 8px;
+        border-radius: 999px;
+        color: var(--yellow);
+        background: rgba(255, 233, 83, 0.12);
+        border: 1px solid rgba(255, 233, 83, 0.4);
+      }
+
+      .links {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        font-size: 0.875rem;
+      }
+
+      .links a {
+        color: rgba(255, 255, 255, 0.85);
+        text-decoration: none;
+        white-space: nowrap;
+        padding: 6px 10px;
+        border-radius: var(--radius);
+      }
+
+      .links a:hover,
+      .links a:focus {
+        color: #ffffff;
+        background-color: rgba(255, 255, 255, 0.15);
+      }
+
+      /* ---------- toolbar ---------- */
+
+      .toolbar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 18px;
+        background: var(--bg);
+        border-bottom: 1px solid var(--border-soft);
+      }
+
+      .field {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex: none;
+      }
+
+      .field > label {
+        font-size: 0.875rem;
+        color: var(--muted);
+      }
+
+      .select {
+        position: relative;
+      }
+
+      .select::after {
+        content: "";
+        position: absolute;
+        right: 13px;
+        top: 50%;
+        width: 7px;
+        height: 7px;
+        border-right: 2px solid var(--muted);
+        border-bottom: 2px solid var(--muted);
+        transform: translateY(-70%) rotate(45deg);
+        pointer-events: none;
+      }
+
+      select {
+        appearance: none;
+        font-size: 0.875rem;
+        color: var(--text);
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 0.375rem 2.25rem 0.375rem 0.75rem;
+        min-width: 250px;
+        max-width: 100%;
+        line-height: 1.5;
+        cursor: pointer;
+      }
+
+      select:hover {
+        background: var(--bg-faded);
+      }
+
+      .hint {
+        flex: 1 1 auto;
+        min-width: 0;
+        font-size: 0.8125rem;
+        color: var(--muted);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .actions {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex: none;
+      }
+
+      .btn {
+        font-size: 0.875rem;
+        font-weight: 400;
+        line-height: 1.5;
+        color: var(--text);
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 0.375rem 0.85rem;
+        cursor: pointer;
+        white-space: nowrap;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        transition:
+          background-color 0.15s ease,
+          border-color 0.15s ease,
+          color 0.15s ease;
+      }
+
+      .btn:hover {
+        background: var(--bg-faded);
+      }
+
+      .btn:disabled {
+        opacity: 0.55;
+        cursor: default;
+      }
+
+      /* The official site's pure-button-primary */
+      .btn.primary {
+        color: var(--on-accent);
+        background: var(--yellow);
+        border-color: var(--yellow);
+        font-weight: 700;
+      }
+
+      .btn.primary:hover {
+        background: var(--yellow-hover);
+        border-color: var(--yellow-hover);
+      }
+
+      /* The official site's default pure-button */
+      .btn.secondary {
+        color: var(--on-accent);
+        background: #cccccc;
+        border-color: #cccccc;
+        font-weight: 600;
+      }
+
+      .btn.secondary:hover {
+        background: #b3b3b3;
+        border-color: #b3b3b3;
+      }
+
+      .btn.ghost {
+        background: transparent;
+        border-color: transparent;
+        color: var(--muted);
+      }
+
+      .btn.ghost:hover {
+        background: var(--bg-faded);
+        color: var(--text);
+      }
+
+      select:focus-visible,
+      .btn:focus-visible,
+      .links a:focus-visible {
+        outline: 2px solid var(--gold);
+        outline-offset: 2px;
+      }
+
+      .topbar .links a:focus-visible {
+        outline-color: var(--yellow);
+      }
+
+      /* ---------- playground ---------- */
+
+      .stage {
+        flex: 1 1 auto;
+        min-height: 0;
+        display: flex;
+        padding: 12px;
+        background: var(--bg);
+      }
+
+      #playground {
+        flex: 1 1 auto;
+        min-width: 0;
+        min-height: 0;
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        overflow: hidden;
+      }
+
+      /* ---------- status bar ---------- */
+
+      .statusbar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 8px 18px;
+        font-size: 0.75rem;
+        color: #888888;
+        background: var(--dark);
+        border-top: 2px solid #7d87a5;
+      }
+
+      .statusbar .note {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .statusbar a {
+        color: #cccccc;
+      }
+
+      .statusbar a:hover,
+      .statusbar a:focus {
+        color: #e6e6e6;
+      }
+
+      #status {
+        margin-left: auto;
+        flex: none;
+        color: var(--ok);
+        opacity: 0;
+        transition: opacity 0.15s ease-in-out;
+      }
+
+      #status.visible {
+        opacity: 1;
+      }
+
+      #status[data-kind="error"] {
+        color: var(--danger);
+      }
+
+      @media (max-width: 1100px) {
+        .hint {
+          display: none;
+        }
+      }
+
+      @media (max-width: 720px) {
+        .toolbar {
+          flex-wrap: wrap;
+        }
+
+        .field {
+          flex: 1 1 100%;
+        }
+
+        .field .select {
+          flex: 1 1 auto;
+        }
+
+        select {
+          min-width: 0;
+          width: 100%;
+        }
+
+        .actions {
+          margin-left: 0;
+          flex: 1 1 100%;
+          justify-content: flex-end;
+        }
+
+        .links {
+          display: none;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .btn .label {
+          display: none;
+        }
+
+        .brand h1 {
+          font-size: 1rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <svg
+          viewBox="-1 -1 92 69"
+          width="31"
+          height="23"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <g transform="translate(-664.83823,-596.61255)">
+            <path
+              fill="#f3d400"
+              d="m 709.69141,596.61258 c 0,0 -3.41031,2.69499 -6.88691,5.37174 -3.57641,-0.11362 -10.59106,0.68718 -14.39187,2.06946 -3.50133,-2.21819 -6.57787,-4.66728 -6.57787,-4.66728 0,0 -2.62896,4.52282 -4.28224,7.17702 -2.45187,1.30403 -4.91362,2.77074 -7.10764,4.7113 -2.55188,-1.01333 -5.5101,-2.24876 -5.60665,-2.28959 3.37945,6.81645 5.65131,13.64192 11.83134,17.74436 9.83897,-15.53906 55.55981,-14.10685 65.60219,-0.0881 6.49004,-3.38511 9.01412,-10.66815 11.56647,-17.39212 -0.27986,0.0922 -3.75271,1.25487 -6.00396,2.11349 -1.34414,-1.46336 -4.51234,-3.71327 -6.31301,-4.79936 -1.70802,-3.12771 -4.19395,-7.35313 -4.19395,-7.35313 0,0 -2.94437,2.1899 -6.35714,4.5792 -4.61059,-0.85108 -10.1872,-1.88519 -14.87749,-1.62916 -3.19286,-2.62436 -6.40127,-5.54786 -6.40127,-5.54786 z"
+            />
+            <path
+              fill="#ffe953"
+              d="m 668.33241,623.47127 c 0,0 4.78987,11.5978 8.1165,19.65678 14.09625,18.59727 50.09234,19.89014 65.7848,0.36006 3.71345,-8.36876 8.72334,-20.1298 8.72334,-20.1298 -4.0259,5.96409 -10.5778,10.08114 -14.61301,12.29885 -2.86735,1.57082 -9.48338,2.52031 -9.48338,2.52031 l -17.36961,-9.00108 -17.46941,8.82104 c 0,0 -6.52806,-1.04882 -9.4834,-2.4303 -5.96472,-3.18408 -9.9764,-6.94592 -14.20583,-12.09586 z"
+            />
+          </g>
+        </svg>
+        <h1>Nim Playground</h1>
+        <span class="tag">Wasm</span>
+      </div>
+      <nav class="links">
+        <a href="https://nim-lang.org/" target="_blank" rel="noopener noreferrer"
+          >Website ↗</a
+        >
+        <a
+          href="https://nim-lang.org/docs/manual.html"
+          target="_blank"
+          rel="noopener noreferrer"
+          >Manual ↗</a
+        >
+        <a
+          href="https://nim-lang.org/docs/lib.html"
+          target="_blank"
+          rel="noopener noreferrer"
+          >Stdlib ↗</a
+        >
+      </nav>
+    </header>
+
+    <div class="toolbar">
+      <div class="field">
+        <label for="samples">Example</label>
+        <div class="select">
+          <select id="samples"></select>
+        </div>
+      </div>
+      <p class="hint" id="hint"></p>
+      <div class="actions">
+        <button
+          type="button"
+          class="btn primary"
+          id="run"
+          title="Compile and run (Ctrl/Cmd + Enter)"
+        >
+          ▶ <span class="label">Run</span>
+        </button>
+        <button
+          type="button"
+          class="btn"
+          id="reset"
+          title="Reset the current example"
+        >
+          Reset
+        </button>
+        <button
+          type="button"
+          class="btn secondary"
+          id="share"
+          title="Copy a link to this exact code"
+        >
+          Share
+        </button>
+        <button
+          type="button"
+          class="btn ghost"
+          id="open"
+          title="Open this code in the LiveCodes app"
+        >
+          Open in LiveCodes
+        </button>
+      </div>
+    </div>
+
+    <main class="stage">
+      <div id="playground" data-default-styles="false"></div>
+    </main>
+
+    <footer class="statusbar">
+      <span class="note"
+        >Nim runs fully in your browser — compiled to WebAssembly with the Clang
+        toolchain via
+        <a
+          href="https://dev.livecodes.io/docs/languages/nim-wasm"
+          target="_blank"
+          rel="noopener noreferrer"
+          >nim-wasm</a
+        >.</span
+      >
+      <span id="status" role="status" aria-live="polite"></span>
+    </footer>
+
+    <script type="module">
+      import {
+        createPlayground,
+        compress,
+        decompress,
+        getPlaygroundUrl,
+      } from "https://cdn.jsdelivr.net/npm/livecodes";
+
+      const APP_URL = "https://dev.livecodes.io";
+      const LANGUAGE = "nim-wasm";
+
+      const SAMPLES = [
+        {
+          label: "Hello, World!",
+          hint: "The smallest Nim program: echo, immutable bindings and string interpolation.",
+          code: `import std/[strformat, strutils]
+
+# Nim is a statically typed, compiled language with a clean, Python-like syntax.
+echo "Hello, World!"
+
+let name = "Nim"
+echo &"Hello, {name}! — string interpolation is checked at compile time."
+
+let answer = 42
+let ratio = 3.14159
+echo &"answer = {answer}, ratio = {ratio}"
+echo "pi to 4 places: ", formatFloat(ratio, ffDecimal, 4)
+
+# Every expression still has a static type, known before the program runs.
+echo "type of answer: ", typeof(answer)
+echo "type of name:   ", typeof(name)
+`,
+        },
+        {
+          label: "Variables & types",
+          hint: "Immutable let, mutable var, numeric literals and distinct types.",
+          code: `import std/strformat
+
+# \`let\` is an immutable binding, \`var\` is mutable, \`const\` is compile-time.
+const Limit = 100
+let language = "Nim"
+var count = 10
+
+count += 5
+echo &"{language}: count = {count}, limit = {Limit}"
+
+# Numeric literals may carry suffixes and digit separators.
+let big = 9_000_000_000'i64
+let small: uint8 = 255
+let hex = 0xFF
+let binary = 0b1010_1010
+echo &"big = {big}, small = {small}, hex = {hex}, binary = {binary}"
+
+# \`distinct\` types keep incompatible units incompatible.
+type
+  Meters = distinct int
+  Seconds = distinct int
+
+let distance = Meters(100)
+echo "100 meters is not 100 seconds: ", distance.int, " m"
+
+# A variable declared without a value starts out as its zero value.
+var pending: string
+var total: int
+echo "zero value of string: '", pending, "'"
+echo "zero value of int:    ", total
+
+# Tuples are lightweight structs with named fields.
+let point = (x: 3, y: 4)
+echo &"point = {point}"
+`,
+        },
+        {
+          label: "Control flow",
+          hint: "if/elif as expressions, exhaustive case, for and while loops.",
+          code: `import std/strformat
+
+var conditional = 42
+
+if conditional < 0:
+  echo "conditional < 0"
+elif conditional > 0:
+  echo "conditional > 0"
+else:
+  echo "conditional == 0"
+
+# \`if\` is an expression, so it can produce a value.
+let parity = if conditional mod 2 == 0: "even" else: "odd"
+echo &"{conditional} is {parity}"
+
+# \`case\` handles values, ranges and sets, and must be exhaustive.
+var letter = 'f'
+case letter
+of 'a':
+  echo "letter is 'a'"
+of 'b', 'c':
+  echo "letter is 'b' or 'c'"
+of 'd'..'h':
+  echo "letter is between 'd' and 'h'"
+else:
+  echo "letter is another character"
+
+# Loops: \`for\` over a range, and \`while\`.
+var total = 0
+for i in 1..10:
+  total += i
+echo &"sum of 1..10 = {total}"
+
+var n = 1
+while n < 100:
+  n *= 2
+echo &"1 doubled until it passes 100: {n}"
+
+# FizzBuzz
+for i in 1..15:
+  if i mod 15 == 0:
+    echo "FizzBuzz"
+  elif i mod 3 == 0:
+    echo "Fizz"
+  elif i mod 5 == 0:
+    echo "Buzz"
+  else:
+    echo i
+`,
+        },
+        {
+          label: "Procs, generics & blocks",
+          hint: "Default arguments, overloading, generics and block parameters.",
+          code: `import std/[strformat, strutils]
+
+# Procs may have default arguments and named results.
+proc greet(name: string; greeting = "Hello"): string =
+  &"{greeting}, {name}!"
+
+echo greet("World")
+echo greet("Nim", "Hey")
+
+# Overloading: the compiler picks by argument type.
+proc describe(value: int): string = &"{value} is an int"
+proc describe(value: string): string = &"{value.escape} is a string"
+
+echo describe(42)
+echo describe("forty-two")
+
+# Generic procs, inferred from the argument type.
+proc firstOf[T](items: openArray[T]): T =
+  items[0]
+
+echo firstOf([1, 2, 3])
+echo firstOf(@["a", "b", "c"])
+
+# \`var\` parameters are passed by reference.
+proc double(x: var int) =
+  x *= 2
+
+var value = 21
+double(value)
+echo &"after double(value): {value}"
+
+# \`openArray\` accepts arrays and sequences without copying.
+proc describeAll(items: openArray[string]): string =
+  items.join(" | ")
+
+echo describeAll(["Nim", "Ada", "Modula"])
+
+# A proc taking a block; \`do\` attaches one with a trailing block.
+proc twice(f: proc()) =
+  f()
+  f()
+
+twice do:
+  echo "  ...and again"
+
+# The body of a proc is an expression when the result is not named.
+proc square(x: int): int = x * x
+
+echo &"square(9) = {square(9)}"
+`,
+        },
+        {
+          label: "Objects & inheritance",
+          hint: "Value objects with operator overloading, plus ref objects and methods.",
+          code: `import std/strformat
+
+# Value objects: assignment copies, and operators are just procs.
+type Point = object
+  x, y: int
+
+proc \`+\`(a, b: Point): Point = Point(x: a.x + b.x, y: a.y + b.y)
+proc \`$\`(p: Point): string = &"({p.x}, {p.y})"
+
+let a = Point(x: 1, y: 2)
+let b = Point(x: 3, y: 4)
+echo &"{a} + {b} = {a + b}"
+
+# \`ref\` objects have reference semantics and can inherit.
+type
+  Animal = ref object of RootObj
+    name: string
+  Dog = ref object of Animal
+  Cat = ref object of Animal
+
+# \`method\` dispatches on the runtime type, unlike \`proc\`.
+method sound(a: Animal): string {.base.} = "..."
+
+method sound(d: Dog): string = "Woof"
+method sound(c: Cat): string = "Meow"
+
+var animals: seq[Animal]
+animals.add Dog(name: "Rex")
+animals.add Cat(name: "Tom")
+
+for animal in animals:
+  echo &"{animal.name} says: {animal.sound()}"
+`,
+        },
+        {
+          label: "Iterators & yield",
+          hint: "Inline iterators, generic iterators and infinite iterators.",
+          code: `import std/[strformat, sequtils]
+
+# Iterators are as easy to write as procs, but they \`yield\` values.
+iterator oddNumbers[Idx, T](a: array[Idx, T]): T =
+  for x in a:
+    if x mod 2 == 1:
+      yield x
+
+for odd in oddNumbers([3, 6, 9, 12, 15, 18]):
+  echo odd
+
+# They can also be generic over the element type and yield tuples.
+iterator counted[T](items: openArray[T]): (int, T) =
+  for i, item in items:
+    yield (i, item)
+
+for index, name in counted(["Nim", "Ada", "Modula"]):
+  echo &"{index}: {name}"
+
+# Inline iterators compile to plain loops and compose with sequtils.
+let squares = toSeq(1..5).mapIt(it * it)
+echo &"squares: {squares}"
+
+# An iterator may be infinite; the consumer decides when to stop.
+iterator fibonacci(): int =
+  var
+    a = 1
+    b = 1
+  while true:
+    yield a
+    let next = a + b
+    a = b
+    b = next
+
+var fibs: seq[int]
+for f in fibonacci():
+  if f > 50:
+    break
+  fibs.add(f)
+echo &"fibonacci (up to 50): {fibs}"
+`,
+        },
+        {
+          label: "Sequences, tables & sets",
+          hint: "seq, Table, HashSet and collect comprehensions.",
+          code: `import std/[strformat, sequtils, tables, sets, algorithm, sugar]
+
+# Sequences are the growable arrays of Nim.
+var languages = @["Nim", "Ruby", "Elixir", "Nim", "Rust"]
+languages.add("Ada")
+echo &"size:   {languages.len()}"
+echo &"unique: {languages.deduplicate()}"
+
+# Slicing and the usual helpers.
+echo &"first 3: {languages[0..2]}"
+echo &"sorted:  {languages.sortedByIt(it.len())}"
+
+# Tables are hash maps.
+var scores = initTable[string, int]()
+scores["Nim"] = 95
+scores["Ruby"] = 88
+scores["Rust"] = 91
+
+echo "Nim scored ", scores["Nim"]
+for name in toSeq(scores.keys).sorted:
+  echo &"{name:<8} {scores[name]}"
+
+# Sets hold unique values and answer membership in constant time.
+var seen = initHashSet[string]()
+for language in languages:
+  seen.incl(language)
+echo &"distinct languages: {seen.len()}"
+let hasNim = "Nim" in seen
+echo &"contains 'Nim': {hasNim}"
+
+# Comprehensions come from the sugar module.
+let doubled = collect(newSeq):
+  for n in 1..5:
+    n * 2
+echo &"doubled: {doubled}"
+`,
+        },
+        {
+          label: "Templates & macros",
+          hint: "Compile-time code generation with templates and macros.",
+          code: `import std/[strformat, macros, strutils]
+
+# Templates are hygienic, compile-time substitutions.
+# (Note: \`&\` from strformat cannot be used in a template body, because the
+# string is expanded by a macro that cannot see the template's parameters.)
+template debug(value: untyped) =
+  echo astToStr(value), " = ", value
+
+debug(2 + 3)
+debug("hello".toUpperAscii)
+
+# Templates can take a block of statements.
+template twice(body: untyped) =
+  body
+  body
+
+twice:
+  echo "  this line is printed twice"
+
+# Macros receive and return the AST.
+macro toEnum(words: static string): untyped =
+  result = newTree(nnkEnumTy, newEmptyNode())
+  for word in words.splitWhitespace():
+    result.add ident(word)
+
+type Color = toEnum"Red Green Blue Indigo"
+
+let color = Indigo
+echo &"color = {color}, ordinal value = {ord(color)}"
+
+# Because macros run at compile time, they can precompute data.
+macro lookupTable(data: static string): untyped =
+  result = newTree(nnkBracket)
+  for word in data.split(';'):
+    result.add newLit(word)
+
+const opcodes = lookupTable("mov;btc;cli;xor")
+for opcode in opcodes:
+  echo opcode
+`,
+        },
+        {
+          label: "Exceptions",
+          hint: "try/except/finally and user-defined exceptions.",
+          code: `import std/[strformat, strutils]
+
+# The standard library raises typed exceptions.
+proc readData(input: string): int =
+  parseInt(input)
+
+try:
+  echo readData("Hello World")
+except ValueError as error:
+  echo &"Error: {error.msg}"
+
+# Exceptions are ordinary objects you can define yourself.
+type
+  AppError = object of CatchableError
+
+proc risky(value: int) =
+  if value < 0:
+    raise newException(AppError, "value must not be negative")
+
+try:
+  risky(-1)
+except AppError as error:
+  echo &"caught AppError: {error.msg}"
+
+# \`finally\` always runs.
+try:
+  echo "about to fail"
+  raise newException(ValueError, "boom")
+except ValueError as error:
+  echo &"caught: {error.msg}"
+finally:
+  echo "this runs no matter what"
+
+# Without the try/except, the program exits with a readable traceback
+# pointing at the failing line — one of the features the website highlights.
+`,
+        },
+      ];
+
+      const playgroundConfig = (code) => ({
+        title: "Nim Playground",
+        description:
+          "Nim, compiled to WebAssembly and running in the browser.",
+        mode: "console",
+        activeEditor: "script",
+        theme: "light",
+        themeColor: "#9a8700",
+        autoupdate: false,
+        markup: {
+          language: "html",
+          content: '<p class="note">Nim output is printed to the console.</p>',
+        },
+        style: {
+          language: "css",
+          content:
+            'body{margin:0;display:grid;place-items:center;height:100vh;background:#fdfdfd;color:#666;font:14px/1.6 "Open Sans",system-ui,sans-serif}',
+        },
+        script: { language: LANGUAGE, title: "Nim", content: code },
+      });
+
+      const elements = {
+        playground: document.getElementById("playground"),
+        samples: document.getElementById("samples"),
+        hint: document.getElementById("hint"),
+        run: document.getElementById("run"),
+        reset: document.getElementById("reset"),
+        share: document.getElementById("share"),
+        open: document.getElementById("open"),
+        status: document.getElementById("status"),
+      };
+
+      let statusTimer;
+
+      const setStatus = (message, kind = "info") => {
+        clearTimeout(statusTimer);
+        elements.status.textContent = message;
+        elements.status.dataset.kind = kind;
+        elements.status.classList.toggle("visible", Boolean(message));
+        if (message && kind !== "error") {
+          statusTimer = setTimeout(
+            () => elements.status.classList.remove("visible"),
+            4000,
+          );
+        }
+      };
+
+      /** The config of a shared link, if the page was opened from one. */
+      const configFromHash = () => {
+        const hash = location.hash.slice(1);
+        if (!hash) return null;
+        try {
+          const json = decompress(hash);
+          return json ? JSON.parse(json) : null;
+        } catch {
+          return null;
+        }
+      };
+
+      const copyToClipboard = async (text) => {
+        try {
+          await navigator.clipboard.writeText(text);
+          return true;
+        } catch {
+          // clipboard API is unavailable in some contexts; fall back below
+        }
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        textarea.setAttribute("readonly", "");
+        textarea.style.position = "fixed";
+        textarea.style.top = "-1000px";
+        document.body.append(textarea);
+        textarea.select();
+        let copied = false;
+        try {
+          copied = document.execCommand("copy");
+        } catch {
+          copied = false;
+        }
+        textarea.remove();
+        return copied;
+      };
+
+      const shared = configFromHash();
+
+      SAMPLES.forEach((sample, index) => {
+        elements.samples.add(new Option(sample.label, String(index)));
+      });
+
+      let playground = null;
+
+      /** Reset only applies while an example is selected (not custom code from a link). */
+      const syncControls = () => {
+        elements.reset.disabled = !Number.isInteger(
+          Number(elements.samples.value),
+        );
+      };
+
+      const setHint = (text) => {
+        elements.hint.textContent = text;
+        elements.hint.title = text;
+        elements.samples.title = text;
+      };
+
+      const selectSample = async (index, { run = true } = {}) => {
+        const sample = SAMPLES[index];
+        if (!sample) return;
+        elements.samples.value = String(index);
+        setHint(sample.hint);
+        syncControls();
+        if (!playground) return;
+        setStatus("Compiling…");
+        try {
+          await playground.setConfig({
+            script: {
+              language: LANGUAGE,
+              title: "Nim",
+              content: sample.code,
+            },
+          });
+          if (run) await playground.run();
+          setStatus("");
+        } catch (error) {
+          setStatus(`Run failed: ${error}`, "error");
+        }
+      };
+
+      // point the dropdown at the example that matches the shared code, if any
+      let initialHint = SAMPLES[0].hint;
+      if (shared) {
+        const sharedCode = shared.script?.content ?? "";
+        const sharedIndex = SAMPLES.findIndex(
+          (sample) => sample.code.trim() === sharedCode.trim(),
+        );
+        if (sharedIndex === -1) {
+          elements.samples.add(new Option("Custom code (from link)", "custom"));
+          elements.samples.value = "custom";
+          initialHint = "Code loaded from a shared link.";
+        } else {
+          elements.samples.value = String(sharedIndex);
+          initialHint = SAMPLES[sharedIndex].hint;
+        }
+      }
+      setHint(initialHint);
+      syncControls();
+
+      try {
+        playground = await createPlayground("#playground", {
+          appUrl: APP_URL,
+          loading: "eager",
+          config: shared ?? playgroundConfig(SAMPLES[0].code),
+        });
+      } catch (error) {
+        setStatus(`Could not load the playground: ${error}`, "error");
+      }
+
+      elements.samples.addEventListener("change", () => {
+        selectSample(Number(elements.samples.value));
+      });
+
+      elements.run.addEventListener("click", async () => {
+        if (!playground) return;
+        setStatus("Compiling…");
+        try {
+          await playground.run();
+          setStatus("");
+        } catch (error) {
+          setStatus(`Run failed: ${error}`, "error");
+        }
+      });
+
+      elements.reset.addEventListener("click", () => {
+        const index = Number(elements.samples.value);
+        if (Number.isInteger(index)) selectSample(index);
+      });
+
+      elements.open.addEventListener("click", async () => {
+        if (!playground) return;
+        try {
+          const config = await playground.getConfig();
+          // Let the LiveCodes app use its own theme, display mode and
+          // autoupdate setting rather than carrying ours over.
+          delete config.theme;
+          delete config.themeColor;
+          delete config.mode;
+          delete config.autoupdate;
+          const url = getPlaygroundUrl({ appUrl: APP_URL, config });
+          window.open(url, "_blank", "noopener");
+        } catch (error) {
+          setStatus(`Could not open the playground: ${error}`, "error");
+        }
+      });
+
+      elements.share.addEventListener("click", async () => {
+        if (!playground) return;
+        const shareButton = elements.share;
+        shareButton.disabled = true;
+        try {
+          const config = await playground.getConfig();
+          const url = new URL(location.href);
+          url.hash = compress(JSON.stringify(config));
+          const copied = await copyToClipboard(url.href);
+          if (copied) {
+            setStatus("Shareable link copied to the clipboard ✓");
+          } else {
+            setStatus(
+              "Copying failed — the link is in the address bar",
+              "error",
+            );
+            location.hash = url.hash;
+          }
+        } catch (error) {
+          setStatus(`Could not create the link: ${error}`, "error");
+        } finally {
+          shareButton.disabled = false;
+        }
+      });
+
+      addEventListener("keydown", (event) => {
+        if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
+          event.preventDefault();
+          elements.run.click();
+        }
+      });
+    </script>
+  </body>
+</html>
