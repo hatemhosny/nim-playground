@@ -211,14 +211,8 @@
         background: var(--bg-faded);
       }
 
-      .hint {
-        flex: 1 1 auto;
-        min-width: 0;
-        font-size: 0.8125rem;
-        color: var(--muted);
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+      #backend {
+        min-width: 165px;
       }
 
       .actions {
@@ -312,7 +306,6 @@
         flex: 1 1 auto;
         min-height: 0;
         display: flex;
-        padding: 12px;
         background: var(--bg);
       }
 
@@ -369,12 +362,6 @@
 
       #status[data-kind="error"] {
         color: var(--danger);
-      }
-
-      @media (max-width: 1100px) {
-        .hint {
-          display: none;
-        }
       }
 
       @media (max-width: 720px) {
@@ -442,9 +429,6 @@
         <span class="tag">Wasm</span>
       </div>
       <nav class="links">
-        <a href="https://nim-lang.org/" target="_blank" rel="noopener noreferrer"
-          >Website ↗</a
-        >
         <a
           href="https://nim-lang.org/docs/manual.html"
           target="_blank"
@@ -467,13 +451,18 @@
           <select id="samples"></select>
         </div>
       </div>
-      <p class="hint" id="hint"></p>
+      <div class="field">
+        <label for="backend">Backend</label>
+        <div class="select">
+          <select id="backend"></select>
+        </div>
+      </div>
       <div class="actions">
         <button
           type="button"
           class="btn primary"
           id="run"
-          title="Compile and run (Ctrl/Cmd + Enter)"
+          title="Compile and run (Shift + Enter)"
         >
           ▶ <span class="label">Run</span>
         </button>
@@ -510,14 +499,7 @@
 
     <footer class="statusbar">
       <span class="note"
-        >Nim runs fully in your browser — compiled to WebAssembly with the Clang
-        toolchain via
-        <a
-          href="https://dev.livecodes.io/docs/languages/nim-wasm"
-          target="_blank"
-          rel="noopener noreferrer"
-          >nim-wasm</a
-        >.</span
+        >Nim runs fully in your browser. No server involved.</span
       >
       <span id="status" role="status" aria-live="polite"></span>
     </footer>
@@ -531,12 +513,19 @@
       } from "https://cdn.jsdelivr.net/npm/livecodes";
 
       const APP_URL = "https://dev.livecodes.io";
-      const LANGUAGE = "nim-wasm";
+      const THEME = "light";
+
+      const BACKENDS = [
+        { value: "js", label: "JavaScript" },
+        { value: "c", label: "C" },
+        { value: "cpp", label: "C++" },
+      ];
+
+      let language = BACKENDS[0].value;
 
       const SAMPLES = [
         {
           label: "Hello, World!",
-          hint: "The smallest Nim program: echo, immutable bindings and string interpolation.",
           code: `import std/[strformat, strutils]
 
 # Nim is a statically typed, compiled language with a clean, Python-like syntax.
@@ -557,7 +546,6 @@ echo "type of name:   ", typeof(name)
         },
         {
           label: "Variables & types",
-          hint: "Immutable let, mutable var, numeric literals and distinct types.",
           code: `import std/strformat
 
 # \`let\` is an immutable binding, \`var\` is mutable, \`const\` is compile-time.
@@ -596,7 +584,6 @@ echo &"point = {point}"
         },
         {
           label: "Control flow",
-          hint: "if/elif as expressions, exhaustive case, for and while loops.",
           code: `import std/strformat
 
 var conditional = 42
@@ -649,7 +636,6 @@ for i in 1..15:
         },
         {
           label: "Procs, generics & blocks",
-          hint: "Default arguments, overloading, generics and block parameters.",
           code: `import std/[strformat, strutils]
 
 # Procs may have default arguments and named results.
@@ -703,7 +689,6 @@ echo &"square(9) = {square(9)}"
         },
         {
           label: "Objects & inheritance",
-          hint: "Value objects with operator overloading, plus ref objects and methods.",
           code: `import std/strformat
 
 # Value objects: assignment copies, and operators are just procs.
@@ -740,7 +725,6 @@ for animal in animals:
         },
         {
           label: "Iterators & yield",
-          hint: "Inline iterators, generic iterators and infinite iterators.",
           code: `import std/[strformat, sequtils]
 
 # Iterators are as easy to write as procs, but they \`yield\` values.
@@ -785,7 +769,6 @@ echo &"fibonacci (up to 50): {fibs}"
         },
         {
           label: "Sequences, tables & sets",
-          hint: "seq, Table, HashSet and collect comprehensions.",
           code: `import std/[strformat, sequtils, tables, sets, algorithm, sugar]
 
 # Sequences are the growable arrays of Nim.
@@ -825,7 +808,6 @@ echo &"doubled: {doubled}"
         },
         {
           label: "Templates & macros",
-          hint: "Compile-time code generation with templates and macros.",
           code: `import std/[strformat, macros, strutils]
 
 # Templates are hygienic, compile-time substitutions.
@@ -869,7 +851,6 @@ for opcode in opcodes:
         },
         {
           label: "Exceptions",
-          hint: "try/except/finally and user-defined exceptions.",
           code: `import std/[strformat, strutils]
 
 # The standard library raises typed exceptions.
@@ -911,12 +892,17 @@ finally:
 
       const playgroundConfig = (code) => ({
         title: "Nim Playground",
-        description:
-          "Nim, compiled to WebAssembly and running in the browser.",
-        mode: "console",
+        description: "Nim, compiled to WebAssembly and running in the browser.",
+        editor: "auto",
+        languages: ["nim"],
+        tools: {
+          status: "full",
+          enabled: ["console", "compiled"],
+          active: "console",
+        },
         activeEditor: "script",
-        theme: "light",
-        themeColor: "#9a8700",
+        theme: THEME,
+        themeColor: "#6c757d",
         autoupdate: false,
         markup: {
           language: "html",
@@ -927,13 +913,13 @@ finally:
           content:
             'body{margin:0;display:grid;place-items:center;height:100vh;background:#fdfdfd;color:#666;font:14px/1.6 "Open Sans",system-ui,sans-serif}',
         },
-        script: { language: LANGUAGE, title: "Nim", content: code },
+        script: { language: "nim", content: code },
       });
 
       const elements = {
         playground: document.getElementById("playground"),
         samples: document.getElementById("samples"),
-        hint: document.getElementById("hint"),
+        backend: document.getElementById("backend"),
         run: document.getElementById("run"),
         reset: document.getElementById("reset"),
         share: document.getElementById("share"),
@@ -998,6 +984,20 @@ finally:
         elements.samples.add(new Option(sample.label, String(index)));
       });
 
+      BACKENDS.forEach((backend) => {
+        elements.backend.add(new Option(backend.label, backend.value));
+      });
+
+      const backendFor = (value) =>
+        BACKENDS.find((backend) => backend.value === value) ?? BACKENDS[0];
+
+      /** Reflect the current backend in the dropdown. */
+      const syncBackend = () => {
+        elements.backend.value = language;
+      };
+
+      syncBackend();
+
       let playground = null;
 
       /** Reset only applies while an example is selected (not custom code from a link). */
@@ -1007,37 +1007,46 @@ finally:
         );
       };
 
-      const setHint = (text) => {
-        elements.hint.textContent = text;
-        elements.hint.title = text;
-        elements.samples.title = text;
-      };
-
-      const selectSample = async (index, { run = true } = {}) => {
+      const selectSample = async (index) => {
         const sample = SAMPLES[index];
         if (!sample) return;
         elements.samples.value = String(index);
-        setHint(sample.hint);
         syncControls();
         if (!playground) return;
         setStatus("Compiling…");
         try {
           await playground.setConfig({
             script: {
-              language: LANGUAGE,
-              title: "Nim",
+              language: "nim",
               content: sample.code,
             },
           });
-          if (run) await playground.run();
+          await playground.run();
           setStatus("");
         } catch (error) {
           setStatus(`Run failed: ${error}`, "error");
         }
       };
 
-      // point the dropdown at the example that matches the shared code, if any
-      let initialHint = SAMPLES[0].hint;
+      /** Switch backend, keeping the code that is currently in the editor. */
+      const selectBackend = async (value) => {
+        const backend = backendFor(value);
+        if (backend.value === language) return;
+        language = backend.value;
+        syncBackend();
+        if (!playground) return;
+        setStatus("Compiling…");
+        try {
+          await playground.setConfig({
+            customSettings: { nim: { target: language } },
+          });
+          await playground.run();
+          setStatus("");
+        } catch (error) {
+          setStatus(`Run failed: ${error}`, "error");
+        }
+      };
+
       if (shared) {
         const sharedCode = shared.script?.content ?? "";
         const sharedIndex = SAMPLES.findIndex(
@@ -1046,13 +1055,16 @@ finally:
         if (sharedIndex === -1) {
           elements.samples.add(new Option("Custom code (from link)", "custom"));
           elements.samples.value = "custom";
-          initialHint = "Code loaded from a shared link.";
         } else {
           elements.samples.value = String(sharedIndex);
-          initialHint = SAMPLES[sharedIndex].hint;
+        }
+        if (shared.script?.language) {
+          language = backendFor(
+            shared.customSettings?.nim?.target ?? "js",
+          ).value;
         }
       }
-      setHint(initialHint);
+      syncBackend();
       syncControls();
 
       try {
@@ -1060,13 +1072,19 @@ finally:
           appUrl: APP_URL,
           loading: "eager",
           config: shared ?? playgroundConfig(SAMPLES[0].code),
+          params: { theme: THEME },
         });
+        await playground.run();
       } catch (error) {
         setStatus(`Could not load the playground: ${error}`, "error");
       }
 
       elements.samples.addEventListener("change", () => {
         selectSample(Number(elements.samples.value));
+      });
+
+      elements.backend.addEventListener("change", () => {
+        selectBackend(elements.backend.value);
       });
 
       elements.run.addEventListener("click", async () => {
@@ -1128,7 +1146,7 @@ finally:
       });
 
       addEventListener("keydown", (event) => {
-        if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
+        if (event.shiftKey && event.key === "Enter") {
           event.preventDefault();
           elements.run.click();
         }
